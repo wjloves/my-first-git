@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+        #content{font-size:15px;line-height:59px;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php">
+            选择日期：<input id="stime" class="Wdate" type="text" name="search[ctime][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  value="<?php if(isset($_GET['search']['ctime']['ge'])){echo $_GET['search']['ctime']['ge']; } ?>" />
+            至<input id="etime" class="Wdate" type="text" name="search[ctime][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($_GET['search']['ctime']['le'])){echo $_GET['search']['ctime']['le'];} ?>"/>
+            <input type="hidden" name="do" value="host-audit"/>
+            <select class="select" name="search[host_rating][eq]">
+                <option value="">主播评级</option>
+                <?php foreach ($data['host_rating'] as $key => $value) {?>
+                    <option value="<?php echo $key;?>" <?php if(isset($_GET['search']['host_rating']['eq']) && $_GET['search']['host_rating']['eq']==$key){ echo "selected";}?>><?php echo $value;?></option>
+                <?php }?>
+            </select>
+            <select class="select" name="search[status][eq]">
+                <option value="">审批状态</option>
+                <option value="1" <?php if(isset($_GET['search']['status']['eq']) && $_GET['search']['status']['eq']==1){ echo "selected";}?>>同意</option>
+                <option value="2" <?php if(isset($_GET['search']['status']['eq']) && $_GET['search']['status']['eq']==2){ echo "selected";}?>>拒绝</option>
+            </select>
+            关键字<input class="input" type="text" name="keyword" value="<?php if(isset($_GET['keyword'])){ echo $_GET['keyword']; } ?>"/>
+            <input type="hidden" name="search[order]" value="ctime" />
+            <input type="submit" name="submit" value="确认" id="sure-btn" />
+          </form>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <td>审核状态</td>
+                    <td>申请日期</td>
+                    <td>主播ID</td>
+                    <td>主播昵称</td>
+                    <td>用户名</td>
+                    <td>主播姓名</td>
+                    <td>安全邮箱</td>
+                    <td>出生日期</td>
+                    <td>手机号码</td>
+                    <td>QQ号码</td>
+                    <td>IP地址</td>
+                    <td>主播评级</td>
+                  
+                    <td>操作人</td>
+                    <td>操作时间</td>
+                  
+                </tr>
+            </thead>
+            <tbody>
+            <?php 
+                if(isset($data['list']) && !empty($data['list'])){
+                    foreach($data['list'] as $key=>$val){?>
+                    <tr>
+                        <td>
+                            <?php if($val['status']==0){?>
+                            <a href="javascript:host_audit(<?php echo $val['auid'];?>,<?php echo $val['host_id'];?>,1);">同意</a> 
+                            <a href="javascript:host_audit(<?php echo $val['auid'];?>,<?php echo $val['host_id'];?>,2);">拒绝</a>
+                            <?php }elseif($val['status']==1){
+                                    echo "已通过";
+                            }else{
+                                    echo "已拒绝";
+                            }?>
+                        </td>
+                        <td><?php echo $val['ctime'];?></td>
+                        <td><?php echo $val['host_id'];?></td>
+                        <td><?php echo $val['nickname'];?></td>
+                        <td><?php echo $val['username'];?></td>
+                        <td><?php echo $val['realname'];?></td>
+                        <td>N/A</td>
+                        <td><?php echo $val['birthday'];?></td>
+                        <td><?php echo $val['phone'];?></td>
+                        <td><?php echo $val['qq'];?></td>
+                        <td>IP N/A</td>
+                        <td>
+                        <?php if($val['host_rating']){ echo $data['host_rating'][$val['host_rating']]; }else{?>
+                        <select  id="<?php echo $val['host_id'];?>">
+                             <option value="">选择评级</option>
+                             <?php foreach ($data['host_rating'] as $key => $value) {?>
+                                <option value="<?php echo $key;?>"><?php echo $value;?></option>
+                            <?php }?>
+                        </select>
+                        <?php }?>
+                        </td>
+                        <td><?php if(isset($val['editor_name'])  && !empty($val['editor_name'])){ echo $val['editor_name'];}?></td>
+                        <td><?php if(isset($val['audit_time'])   && $val['status'] != 0){ echo $val['audit_time'];}?></td>
+                    </tr>
+            <?php }}?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+
+function host_audit(id,uid,status){if(status==1){var state="同意";}else{var state="驳回";}
+var d=dialog({id:"host-audit",content:"<p id='content'>你确定执行"+state+"操作?</p>",okValue:"确认",width:150,height:50,ok:function(){if(status==1){var host_rating=$("#"+uid).val();if(host_rating==''){alert("请选择评级");location.reload();return false;}}
+var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=host-ajaxEdit',{auid:id,status:status,uid:uid,host_rating:host_rating},function(msg){m.close(state+msg);},'json')},cancelValue:'取消',cancel:function(){},});d.showModal();}
+</script>
+</body>
+</html>

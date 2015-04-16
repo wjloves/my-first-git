@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+             <form method="get" action="./index.php" id="myform">
+                选择日期：<input id="stime" class="Wdate" type="text" name="search[ctime][ge]" value="<?php if(isset($data['ge'])){ echo $data['ge'];} ?>" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+                至<input id="etime" class="Wdate" type="text" name="search[ctime][le]" value="<?php if(isset($data['le'])){echo $data['le']; }?>" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+                <select class="select" name="search[order]">
+                        <option value="ctime" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] =='ctime'){ echo "selected";}?>>选择排序方式</option>
+                        <option value="registed_users" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] =='registed_users'){ echo "selected";}?>>新注册用户数</option>
+                        <option value="users_in_room" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] =='users_in_room'){ echo "selected";}?>>连线用户数</option>
+                        <option value="apex_num" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] =='apex_num'){ echo "selected";}?>>峰值连线数</option>
+                </select>
+               <!-- <input type="button" name="summary" value="时间段汇总统计" onclick="javascript:change(1);"/>-->
+                <input type="hidden" name="do" value="member"/>
+                <input type="submit"  value="确认" id="sure-btn"  />
+             </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>日期</td>
+                    <td>新注册用户数</td>
+                    <td>登录账号数</td>
+                  <!--  <td>登录次数</td>-->
+                    <td>连线用户数</td>
+                    <td>连线人次</td>
+                    <td>峰值连线数</td>
+                    <td>峰值连线时刻</td>
+                    <td>平均停留时长</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td><?php echo date('Y-m-d',strtotime('-1 day',strtotime($val['ctime'])));?></td>
+                    <td><?php echo $val['registed_users'];?></td>
+                    <td><?php echo $val['login_users'];?></td>
+              <!--  <td><?php echo $val['login_num'];?></td>-->
+                    <td><?php echo $val['users_in_room'];?></td>
+                    <td><?php echo $val['num_in_room'];?></td>
+                    <td><?php echo $val['apex_num'];?></td>
+                    <td><?php echo $val['apex_time'];?></td>
+                    <td><?php echo $val['avg_time'];?></td>
+                </tr>
+            <?php }?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+   
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+         <form method="get" action="./index.php?do=complaints">
+            用户ID： <input class="input" type="text" name="keyword" value="<?php if(!empty($data['keyword'])){ echo $data['keyword'];}?>"/>
+            选择日期：<input id="stime" class="Wdate" type="text" name="search[created][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  value="<?php if(isset($_GET['search']['created']['ge'])){ echo $_GET['search']['created']['ge'];} ?>"/>
+            至<input id="etime" class="Wdate" type="text" name="search[created][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($_GET['search']['created']['le'])){ echo $_GET['search']['created']['le'];} ?>" />
+            <select  class="select" name="search[editors_id][eq]">
+                    <option value="">客服名称</option>
+                    <?php foreach($data['custom'] as $val){?>
+                       <option value="<?php echo $val['admin_id'];?>"  <?php if(isset($_GET['search']['send_uid']['eq']) && $val['admin_id']==$_GET['search']['editors_id']['eq']){ echo "selected";}?>><?php echo $val['name'];?></option>
+                    <?php }?>
+            </select>
+            <input type="hidden" name="do" value="complaints"/>
+            <input type="submit"  value="查找" id="sure-btn" />
+          </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    
+                    <td>用户ID</td>
+                    <td>客服ID</td>
+                    <td>分类</td>
+                    <td>内容</td>
+                    <td>发起时间</td>
+                    <td>状态</td>
+                    <td>操作人</td>
+                    <td>处理日期</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php 
+                if(isset($data['list']) && !empty($data['list'])){
+               foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    
+                    <td><?php echo $val['uid'];?></td>
+                    <td><?php echo $val['cid'];?></td>
+                    <td><?php  echo $data['mail_type'][$val['type']];?></td>
+                    <td><?php echo $val['content'];?></td>
+                    <td><?php echo $val['created'];?></td>
+                    <td><a href="javascript:edit(<?php echo $val['id'];?>,<?php echo $val['status'];?>)" ><?php if($val['status']){ echo "处理完毕";}else{ echo "待处理";}?></a></td>
+                    <td><?php echo $val['editors'];?></td>
+                    <td><?php echo $val['edit_time'];?></td>
+                </tr>
+            <?php }}?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+        
+        <div class="search" id="edit" style="display: none;">
+            <table>
+                <tr style="padding-top: 10px;">
+                        <td>当前状态:</td>
+                        <td id="art_status">
+                            <select  name="levle" class="select" id="sent_status">
+                                <option value="0" >待处理</option>
+                                <option value="1" >处理完成</option>
+                             </select>
+                        </td>
+                </tr>
+                <tr>
+                      <td>处理意见:</td>
+                      <td class="result"><textarea rows="9" cols="30" name="content" id="sent_results"></textarea></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var data={};function edit(id,status){var content=$("#edit").html();var d=dialog({id:'new-message',title:'处理客户意见',content:content,width:400,height:260,okValue:'确定',onshow:function(){if(status){$(".ui-dialog").find("#art_status").html("处理完成");$.get("./index.php?do=complaints-ajaxGetOne&id="+id,function(res){$(".ui-dialog").find(".result").html(res.results);},"json");}else{$.ajax({url:"./index.php",data:{"do":"complaints-ajaxGetOne","id":id},async:false,dataType:"json",success:function(res){data.textarea=res.results;}});}
+$(".ui-dialog").find("#sent_results").val(data.textarea);},ok:function(){if(!status){var s_results=$(".ui-dialog").find("#sent_results").val();var s_status=$(".ui-dialog").find("#sent_status").val();if(s_results==""&&s_status==0){return true;}
+var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=complaints-ajaxEdit',{results:s_results,status:s_status,id:id},function(msg){m.close(msg);},'json');}},cancelValue:'取消',cancel:function(){},});d.showModal();}
+</script>
+</body>
+</html>

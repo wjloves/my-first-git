@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div style="padding:0 0 20px 0"><label style="font-size: 26px;">主播提成设置</label></div>
+        <div>
+            <?php if(isset($data['host_type']) && !empty($data['host_type'])){
+            foreach($data['host_type'] as $key=>$val){?>
+            <button style="margin: 0 10px 10px 0 ;font-size: 15px;" onclick="location.href='?do=hostincome-set&type=<?php echo $key; ?>'"><?php echo $val; ?></button>
+            <?php }}?>
+        </div>
+        <div>
+            <form method="POST" action="./index.php?do=hostincome-setcp">
+            <label style="font-size: 15px;margin-right: 5px;">公司保留总提成</label>
+            <input type="text" value="<?php echo $data['company_percent']; ?>" name="company_percent" />
+            <input type="submit" name="" value="保存"/>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+</script>
+</body>
+</html>

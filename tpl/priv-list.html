@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+        .submit{font-size: 18px;margin:20px 0 0 20px;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="post" action="./index.php?do=priv" id="myform">
+            对应管理员：
+            <select class="select" name="conditions"  id="reback">
+                   <option value="">选择管理员</option>
+                   <?php foreach ($data['custom'] as $admin => $cost) {?>
+                   <option value="<?php echo $cost['admin_id']?>"><?php echo $cost['name']?></option>
+                   <?php }?>
+            </select>
+          <input type="button" value="添加权限" id="addpriv"/>
+        </div>
+        <table>
+            <tbody>
+            <?php foreach($priv_list as $key=>$val){  
+            ?>
+            <tr><td class="tdThead"><?php echo $key;?></td></tr>
+            <tr>
+            <?php  foreach ($val as $k => $val) {?>
+                    <td><input type="checkbox" name="priv_id[]" class="priv_id" value="<?php echo $val['priv_id'];?>"/><?php echo $val['priv_name'];?></td>
+            <?php }?>
+            </tr>
+            <?php }?>
+            
+            </tbody>
+        </table>
+        <div >
+            <input type="checkbox" name="allchecked" id="allchecked"  onclick="javascript:choice();" />全选
+            <input class="submit" type="submit" name="dosubmit"  value="保存"/>
+        </div>
+        </form>
+        <div style="clear:both"></div>
+        <div class="search" id="hidepriv" style="display: none;">
+            <table  style="font-size: 18px; line-height: 55px; margin-left:30px;">
+                <tr>
+                   <td>选择归类：</td>
+                   <td>
+                        <select class="select" name="parent">
+                                <?php foreach ($list as $key => $value) {?>
+                                  <option value="<?php echo $value['priv_id'];?>"><?php echo $value['priv_name'];?></option>
+                                <?php }?>
+                        </select>
+                   </td>
+                </tr>
+                <tr>
+                        <td>权限名称:</td>
+                        <td><input type="text" name="priv_name" id="priv_name"/></td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" name="top" id="top_check" value="111" />添加顶级类别</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    
+
+$(function(){$("#addpriv").click(function(){var content=$("#hidepriv").html();var d=dialog({id:'add-priv',title:'添加权限',content:content,fixed:true,width:400,height:260,okValue:'确定',ok:function(){var data={};data.parent=0;if($(".ui-dialog").find("#top_check").prop("checked")==false){data.parent=$(".ui-dialog").find("[name='parent']").val();}
+data.priv_name=$(".ui-dialog").find("#priv_name").val();if(data.priv_name.length<1){alert("请填写权限名称");return false;}
+var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();var jsonString=JSON.stringify(data);$.post('./index.php?do=priv-ajaxPriv',{data:jsonString},function(msg){m.close(msg);},'json');},cancelValue:'取消',cancel:function(){},});d.showModal();});});function choice(){if($("#allchecked").is(':checked')){$(".priv_id").prop("checked",true);}else{$(".priv_id").prop("checked",false);}}
+$(function(){$("#reback").change(function(){var id=$(this).val();$.post('./index.php?do=priv-ajaxReback',{id:id},function(msg){$(".priv_id").each(function(){var tag=$(this).val();if($.inArray(tag,msg)>-1){$(this).prop("checked",true);}else{$(this).prop("checked",false);}});},'json');});})
+
+</script>
+</body>
+</html>

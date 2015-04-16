@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div style="padding:0 0 20px 0"><label style="font-size: 26px;">主播提成设置(
+            <?php if($hostType == 1) echo '普通'; elseif($hostType == 2) echo '中级'; elseif($hostType == 3) echo '高级'; ?>
+        )</label></div>
+        <div>
+            <?php if(isset($data['host_type']) && !empty($data['host_type'])){
+            foreach($data['host_type'] as $key=>$val){?>
+            <button style="margin: 0 10px 10px 0 ;font-size: 15px;" onclick="location.href='?do=hostincome-set&type=<?php echo $key; ?>'"><?php echo $val; ?></button>
+            <?php }}?>
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <th>编号</th>
+                    <th>主播类型</th>
+                    <th>直播时长</th>
+                    <th>每
+                        <?php if($hostType == 1) echo '月'; else echo '日'; ?>
+                        最低收入（钻石）</th>
+                    <th>该等级收入封顶（钻石）</th>
+                    <th>提成比例</th>
+                    <th>操作</th>
+                </tr>
+                <?php if(isset($data['withdrawal']) && !empty($data['withdrawal'])){
+                foreach($data['withdrawal'] as $key=>$val){?>
+                <tr>
+                    <td class="pid"><?php echo $val['id']; ?></td>
+                    <td><?php if ($val['anchortype'] == 1) echo '普通艺人'; elseif($val['anchortype'] == 2) echo '中级艺人'; else echo '高级艺人'; ?></td>
+                    <td><label class="olddata"><?php echo $val['duration']/60; ?></label><input type="text" name="duration" value="<?php echo $val['duration']/60; ?>" style="display: none;" /></td>
+                    <td><label class="olddata"><?php echo $val['minincome']; ?></label><input type="text" name="minincome" value="<?php echo $val['minincome']; ?>" style="display: none;" /></td>
+                    <td><label class="olddata"><?php echo $val['maxincome']; ?></label><input type="text" name="maxincome" value="<?php echo $val['maxincome']; ?>" style="display: none;" /></td>
+                    <td><label class="olddata"><?php echo $val['rpercentage']; ?></label><input type="text" name="rpercentage" value="<?php echo $val['rpercentage']; ?>" style="display: none;" /></td>
+                    <td><button class="edit">修改</button><label style='display:none' id="sureorcancel"><button class="sure" style="margin-right: 15px;font-size: 15px;">确定</button><button class="cancel" style="font-size: 15px;">取消</button></label></td>
+                </tr>
+                <?php }}?>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //编辑
+    $('.edit').click(function(){
+        var trdist = $(this).parents('tr');
+        //把隐藏框显示出来
+        trdist.find(':input').show();
+        //把显示的数据给隐藏起来
+        trdist.find('.olddata').hide();
+        //把按纽换成确定和取消
+        trdist.find('.edit').hide();
+        trdist.find('#sureorcancel').show();
+    });
+    //取消
+    $('.cancel').click(function(){
+        var trdist = $(this).parents('tr');
+        trdist.find(':input').hide();
+        trdist.find('.olddata').show();
+        trdist.find('.edit').show();
+        trdist.find('#sureorcancel').hide();
+    });
+    //确定
+    $('.sure').click(function(){
+        var trdist = $(this).parents('tr');
+        //ajax请求
+        var duration = trdist.find(':input[name=duration]').val();
+        var minincome = trdist.find(':input[name=minincome]').val();
+        var maxincome = trdist.find(':input[name=maxincome]').val();
+        var rpercentage = trdist.find(':input[name=rpercentage]').val();
+        var pid = trdist.find('.pid').html();
+        //alert(pid);
+        $.ajax({
+              url: "?do=hostincome-setHP",
+              dataType: 'json',
+              type: 'POST',
+              data:  {'id':pid, 'duration':duration, 'minincome':minincome, 'maxincome':maxincome, 'rpercentage':rpercentage},
+              success: function(data1, textStatus){
+                alert(data1.message);
+                location.reload();
+                return true;
+              }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+        .ui-dialog .page{width:100%;float:left;margin-top:15px;}
+        .ui-dialog .page ul{display:block;}
+        .ui-dialog .page li{list-style: none;float: left;}
+        .ui-dialog .page li a{display:block;margin: 0 -1px;width:28px;height:24px;color:#666666;border:1px solid #d3d3d3;background-color:#f5f5f5;text-align:center;line-height:24px;text-decoration: none;}
+        .ui-dialog .page li a.first{margin-right:10px;}
+        .ui-dialog .page li a.current{color:#fff;background-color: #ff6600;}
+        .ui-dialog .page li a.last{margin-left:10px;}
+        .ui-dialog .page div{float:left;height:26px;line-height:26px;margin-left:12px;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <table>
+            <thead>
+                <tr>
+                    <td>主播评级</td>
+                    <td>等级工资</td>
+                    <td>分成比率%</td>
+                    <td>操作</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td><?php echo $val['rating_name'];?></td>
+                    <td><?php echo $val['salary'];?></td>
+                    <td><?php echo $val['shares'];?></td>
+                    <td><a href="javascript:edit('<?php echo $val['rating_name'];?>',<?php echo $val['auid'];?>,<?php echo $val['salary'];?>,'<?php echo $val['shares'];?>')">编辑</a> | <a href="javascript:ajax_pages('<?php echo $val['rating_name'];?>',1,1);"  class="edit">详情</a>
+                        <input type="hidden" name="rating_name" value="<?php echo $val['rating_name'];?>"/>
+                    </td>
+                </tr>
+            <?php }?>
+              <?php if(in_array(42, $priv)){?>
+                <tr><td></td><td></td><td></td><td><input type="button"  value="新增"  id="add"/></td></tr>
+              <?php }?>
+            </tbody>
+        </table>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+function edit(name,id, salary, shares) {
+    var html = name+"主播：<br /><br />等级工资：<input id='salary' type='text' value='" + salary + "' /><br />分成比率：<input id='shares' type='text' value='" + shares + "' />";
+    var d = dialog({
+        id: 'edit-host-shares',
+        title: '编辑',
+        content: html,
+        okValue: '确定',
+        ok: function() {
+            var salary = $("#salary").val();
+            var shares = $("#shares").val();
+            $.get('./index.php?do=percentage-ajaxEdit&type=1&id=' + id + '&shares=' + shares+"&salary="+salary+"&rating="+name,
+            function(msg) {
+                var t = dialog({
+                    content: '修改成功',
+                    width: 220,
+                    ok: function() {
+                        location.reload();
+                    }
+                });
+                if (msg) {
+                    t.show().content('修改成功');
+                } else {
+                    t.show().content('修改失败');
+                }
+            })
+        },
+        cancelValue: '取消',
+        cancel: function() {}
+    });
+    d.showModal();
+}
+$(function() {
+    $("#add").click(function() {
+        var a = dialog({
+            id: "add",
+            title: "新增主播评级",
+            content: "主播评级：<input id='host_rating' type='text' value='' /><br /><br />等级工资：<input id='host_salary' type='text' value='' /><br /><br />分成比率：<input id='host_shares' type='text' value='' />",
+            okValue: '确定',
+            ok: function() {
+                var rating = $("#host_rating").val(); 
+                var shares = $("#host_shares").val();
+                var salary  = $("#host_salary").val();
+                if($.trim(rating).length <= 0){
+                      alert("请填写评级");
+                      return false;
+                }
+                var m = dialog({
+                    id: 'showmessage',
+                    width: 50,
+                    height: 50
+                });
+                m.addEventListener('close',
+                function() {
+                    var t = dialog({
+                        content: m.returnValue,
+                        ok: function() {
+                            location.reload();
+                        }
+                    });
+                    t.show();
+                });
+                m.showModal();
+                $.post('./index.php?do=percentage-ajaxAdd', {
+                    rating : rating,
+                    salary : salary,
+                    shares : shares
+                },
+                function(msg) {
+                    m.close(msg);
+                },
+                "json")
+            },
+            cancelValue: '取消',
+            cancel: function() {}
+        });
+        a.showModal();
+    });
+});
+
+function ajax_pages(id,type,page){
+     //   var id = $("this").siblings('input');
+       // console.log(this);return;
+        if(id == '' || id == 0){
+             return false;
+        }
+        $.post('./index.php?do=percentage-ajaxSplitLog',{'id':id,'page':page,'type':type},function(msg){
+            var inhtml = '';
+            if(msg){
+                var mssg = eval('(' + msg + ')');
+                if(mssg.list){
+                    var inhtml = '<div><table><thead>';
+                    $.each(mssg.list,function(i,n){
+                          inhtml += '<tr><td>'+n.created+'&nbsp;&nbsp;'+n.admin_user+'将'+n.rating_name;
+                          if(n.before_salary != n.after_salary){
+                                  inhtml += '主播工资由'+n.before_salary+'修改为'+n.after_salary+',';
+                          }
+                          if(n.before_shares != n.after_shares){
+                             inhtml += '分成比例由'+n.before_shares+'修改为'+n.after_shares;
+                          }
+                          inhtml += ' </td></tr>';
+                    });
+                    inhtml +='</tbody></table>';
+                    inhtml +='<div class="page">'+mssg.pages+'</div></div>';
+                    //<input type="hidden" name="rating_name" value="'+id+'"/>
+                    var l = dialog({
+                    id: "show_logs",
+                    title: "详情",
+                    content: inhtml,
+                    width:550,
+                    height:200,
+                    okValue: '确定',
+                    ok: function() {},
+                    cancelValue: '取消',
+                    cancel: function() {}
+                    });
+                    l.showModal();
+                }else{
+                      alert("没有操作记录");
+                }
+            }
+        });
+}
+function  ajaxjump(page,type){
+        var  Newpage = $("#gotopage").val();
+        var  id      = $(".ui-dialog").find("[name='rating_name']").val()
+        console.log(id);return;
+        if(Newpage==0 || Newpage==''){
+                alert("请输入要跳转的页码");
+                return  false;
+        }
+        var page_nums = parseInt($("#page_nums").text(),10);
+        if(Newpage>page_nums){
+             Newpage = page_nums;
+        }
+        if(page>0){
+              ajax_pages(id,Newpage,type);
+        }
+}
+</script>
+</html>

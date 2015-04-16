@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form  id="myform" method="post" action="./index.php?do=props-addUsersProps">
+                <table class="twoCel">
+                    <tr>
+                        <td>当前公告：</td>
+                        <td id="current"></td>
+                    </tr>
+                    <tr>
+                        <th> </th>
+                            <td><input onclick="javascript:valicont()" type="button" name="dosubmit" value="修改" /></td>    
+                        </tr>
+                </table>
+            </form>
+        </div>
+       
+        <div class="main_down" style="margin-top: 220px;">
+            <div class="main_content">
+                <h3>历史公告:</h3>
+                <table >
+                    <thead>
+                        <tr>
+                            <td>时间</td>
+                            <td>公告内容</td>
+                            <td>操作人</td>
+                            <td>修改状态</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php 
+                      if(isset($data['list']) && !empty($data['list'])){
+                        foreach($data['list'] as $logs){?>
+                          <tr>
+                              <td><?php echo $logs['created'];?></td>
+                              <td><?php echo $logs['content'];?></td>
+                              <td><?php echo $logs['admin']['name'];?></td>
+                              <td><?php if($logs['status']==1){ echo "成功";}else{ echo "失败";}?></td>
+                          </tr>
+                    <?php }}?>
+                    </tbody>
+                </table>
+           </div>
+            <div class="page">
+                <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            </div>
+        </div>
+      
+      
+        <div style="clear:both"></div>
+        <div class="search" id="edit" style="display: none;">
+            <table  style="font-size: 14px;  margin-left:30px;">
+                <tr>
+                        <td><textarea style="width: 350px;height: 150px;max-width: 350px;max-height: 150px;resize: none; text-indent: 0.5em;" name="name" id="new_announcement"  value=""></textarea>
+                          </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+   function valicont() {
+        var current = $("#current").text();
+        var content = $("#edit").html();
+        var d = dialog({
+                id: "edit-announcement",
+                title:"公告编辑",
+                content: content,
+                okValue: "修改",
+                width: 430,
+                height: 160,
+                onshow: function() {
+                    $(".ui-dialog").find("#new_announcement").val(current);
+                },
+                ok: function() {
+                    var data = {};
+                    data.content = $(".ui-dialog").find("#new_announcement").val();
+                    if (data.content.length < 1) {
+                        alert("广告不能为空");
+                        return false;
+                    }
+                    data.admin_id = "<?php echo $this->_login['admin_id'];?>";
+                    var m = dialog({
+                        id: 'showmessage',
+                        width: 50,
+                        height: 50
+                    });
+                    m.addEventListener('close',
+                    function() {
+                        var t = dialog({
+                            content: m.returnValue,
+                            ok: function() {
+                                location.reload();
+                            }
+                        });
+                        t.show();
+                    });
+                    m.showModal();
+                    var jsonString = JSON.stringify(data);
+                    $.post('./index.php?do=announcement-editAnnouncement', {
+                        data: jsonString
+                    },
+                    function(msg) {
+                        m.close(msg);
+                    },
+                    'json');
+                },
+            cancelValue: '取消',
+            cancel: function() {},
+        });
+        d.showModal();
+        
+   }
+
+   $(function(){
+    $.get('./index.php?do=announcement-getNewAnnouncement',
+          function(msg) {
+            if (msg) {
+                $("#current").text(msg.content);
+            }
+    },'json');
+   });
+</script>
+</html>

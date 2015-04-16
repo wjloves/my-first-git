@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php?do=host-details">
+              输入主播ID：<input class="input" type="text" name="uid" value="<?php if(isset($list['uid'])){ echo $list['uid'];}?>"/>
+              <input type="hidden" name="do" value="host-details"/>
+              <input type="submit" name="dosubmit" value="确认" id="sure-btn" />
+        </div>
+        <?php if(isset($error)){ echo $error;}?>
+        <?php if(!empty($data['list'])){?>
+        <div class="main_top">
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="introduce">主播ID:</td> <td><?php echo $list['uid'];?></td>
+                        <td class="introduce">经验值:</td> <td><?php echo $list['rich'];?></td>
+                        <td class="introduce">所在房间：</td> <td><?php echo $list['rid'];?></td>
+                    </tr>
+                    <tr>
+                        <td class="introduce">注册邮箱:</td> <td><?php echo $list['username'];?></td>
+                        <td class="introduce">主播等级:</td> <td><?php echo $list['lv_exp'];?></td>
+                        <td class="introduce">目前状态：</td> <td><?php if(isset($list['is_online'])&&($list['is_online']>-1)){ echo '在线';}else{ echo '下线';}?></td>
+
+                    </tr>
+                    <tr>
+                        <td class="introduce">昵称:</td> <td><?php echo $list['nickname'];?></td>
+                        <td class="introduce">账户余额:</td> <td><?php echo round(($list['points']/10),2);?>元</td>
+                        <td class="introduce">最后登录时间:</td> <td><?php echo $list['logined'];?></td>
+                    </tr>
+                    <tr>
+                        <td class="introduce">性别:</td> <td><?php if($list['sex']==0){ echo "女";}else{ echo "男";}?></td>
+                        <td class="introduce">直播时长:</td> <td><?php echo $list['total_duration'];?></td>
+                        <td class="introduce" style="color:red;">会员生日:</td><td style="color:red;"><?php echo $list['birthday'];?></td>
+                        
+                    </tr>
+                   <tr>
+                        <td class="introduce">累计直播次数:</td> <td><?php echo $list['live_num'];?></td>
+                        <td class="introduce">注册时间:</td> <td><?php echo $list['created'];?></td>
+                        <td class="introduce">属地:</td> <td><?php echo $list['area'];?></td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div><br/>
+        <div class="choice">
+            <input type="submit" name="dosubmit" value="收入记录" onclick=""/>
+            <input type="button"  value="提款记录" />
+            <input type="button" value="直播记录" onclick="ajax_pages(1,'trecharge')"/>
+        <div>
+        <div class="main_down">
+            <div class="main_content">
+                <table>
+                    <thead>
+                        <tr>
+                            <td>消费时间</td>
+                            <td>商品ID</td>
+                            <td>商品名称</td>
+                            <td>消费金额 （元）</td>
+                            <td>用户ID</td>
+                            <td>用户昵称</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                      if(isset($data['consume_list']) && !empty($data['consume_list'])){
+                        foreach($data['consume_list'] as $consum){?>
+                          <tr>
+                              <td><?php echo $consum['created'];?></td>
+                              <td><?php echo $consum['gid'];?></td>
+                              <td><?php echo $consum['goods_name'];?></td>
+                              <td><?php echo round(($consum['points']/10),2);?></td>
+                              <td><?php echo $consum['send_uid'];?></td>
+                              <td><?php echo $consum['nickname'];?></td>
+                          </tr>
+                    <?php }}?>
+                    </tbody>
+                </table>
+           </div>
+            <div class="page">
+                <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            </div>
+        </div>
+         </form>
+        <?php }?>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    function ajax_pages(page,type){
+          var type = '"'+type+'"';
+          var uid = "<?php if(isset($list['uid'])){ echo $list['uid'];}?>";
+          $.post('./index.php?do=host-ajax',{'uid':uid,'page':page,'type':type},function(msg){
+              if(msg){
+                  var mssg = eval('(' + msg + ')');
+                  var inhtml = '<table><thead>';
+                  if(type==='"consume"'){
+                      inhtml += '<tr><td>消费时间</td><td>商品ID</td><td>商品名称</td><td>消费金额</td><td>用户ID</td><td>用户名称</td></tr></thead><tbody>';
+                      $.each(mssg.list,function(i,n){
+                          inhtml += '<tr><td>'+n.created+'</td> <td>'+n.gid+'</td> <td>'+n.goods_name+'</td>  <td>'+n.points+'</td>  <td>'+n.send_uid+'</td> <td>'+n.nickname+'</td></tr>';
+                     });
+                  }else{
+                      inhtml += '<td>直播开始时间</td><td>直播结束时间</td><td>直播时长</td><td>房间ID</td> <td>房间主题</td><td>直播收入（元）</td></thead><tbody>';
+                      $.each(mssg.list,function(i,n){
+                          inhtml += '<tr><td>'+n.start_time+'</td> <td>'+n.end_time+'</td> <td>'+n.duration+'</td> <td>'+n.rid+'</td> <td>N/A</td><td>'+n.points+'</td></tr>';
+                      });
+                  }
+                  inhtml +='</tbody></table>';
+                  $(".main_content").html(inhtml);
+                  $(".page").html(mssg.pages);
+              }
+          });
+    }
+    function  ajaxjump(page,type){
+          var  Newpage = $("#gotopage").val();
+          if(Newpage==0 || Newpage==''){
+                alert("请输入要跳转的页码");
+                return  false;
+          }
+          var page_nums = parseInt($("#page_nums").text(),10);
+          if(Newpage>page_nums){
+             Newpage = page_nums;
+          }
+          if(page>0){
+              ajax_pages(Newpage,type);
+          }
+    }
+</script>
+</html>

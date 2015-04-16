@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php" id="myform">
+                <input type="hidden" name="do" value="mrecharge-check"/>
+                处理状态：<select class="select" name="search[status]">
+                <?php foreach($data['status'] as $k=>$v){?>
+                <option value="<?php echo $k ?>" <?php if($k==$_GET['search']['status']){ echo "selected";}?>><?php echo $v ?></option>
+                <?php }?>
+            </select>
+                充值员： <input class="input" type="text" name="search[apply_name]"  value="<?php echo $_GET['search']['apply_name'] ?>"  />
+                审核员： <input class="input" type="text" name="search[check_name]"  value="<?php echo $_GET['search']['check_name'] ?>"  />
+                审核日期： <input id="stime" class="Wdate" type="text" name="search[check_time][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  value="<?php if(isset($_GET['search']['check_time']['ge'])){ echo $_GET['search']['check_time']['ge'];} ?>"/>
+                至<input id="etime" class="Wdate" type="text" name="search[check_time][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($_GET['search']['check_time']['le'])){ echo $_GET['search']['check_time']['le'];} ?>" />
+
+                <input type="submit"  value="搜索" id="sure-btn"  />
+            </form>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <td>状态</td>
+                <td>用户帐号</td>
+                <td>所属团队</td>
+                <td>充值金额</td>
+                <td>充值类型</td>
+                <td>备注</td>
+                <td>充值员</td>
+                <td>审核员</td>
+                <td>审核时间</td>
+                <td>操作</td>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <?php foreach($data['mrecharge_data'] as $k=>$v){?>
+            <tr>
+                <td><?php if($v['status']==0){ echo "等待审核"; }elseif($v['status']==1){ echo "审核通过";}else{ echo "审核失败";} ?></td>
+                <td><?php echo $v['account'];?></td>
+                <td><?php echo $v['team'];?></td>
+                <td><?php echo $v['plus_gold'];?></td>
+                <td><?php if($v['rechargetype']==0){ echo "人工充值"; }elseif($v['rechargetype']==1){ echo "活动奖励";}else{ echo "平台赔偿";} ?></td>
+                <td><?php echo $v['remark'];?></td>
+                <td><?php echo $v['apply_name'];?></td>
+                <td><?php echo $v['check_name'];?></td>
+                <td><?php if($v['check_time']!='0000-00-00 00:00:00') echo $v['check_time'];?></td>
+                <td><?php if($v['status']==0){ ?><input type="button" onclick="check(<?php echo $v['id'];?>,'<?php echo $v['account'];?>',<?php echo $v['plus_gold'];?>)"  value="审核" id="check"  />
+                    <?php }elseif($v['status']==1){ echo "-";}else{ echo $v['check_remark'];} ?></td>
+            </tr>
+            <?php }?>
+
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    function check(id,account,gold) {
+
+
+        var content = "<p class='dialog-content'>用户帐号"+account+"充值"+gold+" <br /><br />备注<br /><textarea rows='5' cols='40' id='check_remark'></textarea></p>";
+        var width = 300;
+        var height = 150;
+        var state = "审核";
+
+        var d = dialog({
+            id: 'del-admin',
+            content: content,
+            width: width,
+            height: height,
+            fixed: true,
+            button: [
+                {
+                    value: '通过',
+                    callback: function () {
+                        var m = dialog({
+                            id: 'showmessage',
+                            width: 50,
+                            height: 50
+                        });
+                        m.addEventListener('close',
+                                function() {
+                                    var t = dialog({
+                                        content: m.returnValue,
+                                        ok: function() {
+                                            location.reload();
+                                        }
+                                    });
+                                    t.show();
+                                });
+                        m.showModal();
+                        var url = './index.php?do=Mrecharge-ajaxCheck';
+                        var param ={
+                            id:id,
+                            status:1,
+                            check_remark:$("#check_remark").val()
+                        };
+                        $.post(url, param,
+                                function(msg) {
+                                    m.close(msg);
+                                });
+                        return false;
+                    },
+                    autofocus: true
+                },
+                {
+                    value: '不通过',
+                    callback: function () {
+                        var m = dialog({
+                            id: 'showmessage',
+                            width: 50,
+                            height: 50
+                        });
+                        m.addEventListener('close',
+                                function() {
+                                    var t = dialog({
+                                        content: m.returnValue,
+                                        ok: function() {
+                                            location.reload();
+                                        }
+                                    });
+                                    t.show();
+                                });
+                        m.showModal();
+                        var url = './index.php?do=Mrecharge-ajaxCheck';
+                        var param ={
+                            id:id,
+                            status:2,
+                            check_remark:$("#check_remark").val()
+                        };
+                        $.post(url, param,
+                                function(msg) {
+                                    m.close(msg);
+                                });
+                        return false;
+                    }
+                },
+                {
+                    value: '取消'
+                }
+            ]
+        });
+        d.showModal();
+    }
+</script>
+</body>
+</html>

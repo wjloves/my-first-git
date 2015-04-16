@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right  div.main .col{width:250px;float:left;}
+        .ui-dialog input{height: 24px;width: 190px;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="post" action="./index.php?do=recharge-audit">
+                充值用户：<input type="text" name="search[uname]" value="<?php echo $search['search']['uname']; ?>" />
+                充值ID：<input type="text" name="search[uid]" value="<?php echo $search['search']['uid']; ?>" />
+                充值订单号：<input type="text" name="search[tradeno]" value="<?php echo $search['search']['tradeno']; ?>" style="width: 200px;"/>
+                财务订单号：<input type="text" name="search[tradeno2]" value="<?php echo $search['search']['tradeno2']; ?>" style="width: 200px;"/>
+                充值状态：
+                <select class="select"  name="search[pay_status]">
+                    <option value="" selected="selected">全部</option>
+                    <option value="1" <?php if( $search['search']['pay_status'] == 1 ){ echo "selected";}?>>未支付</option>
+                    <option value="2" <?php if( $search['search']['pay_status'] == 2 ){ echo "selected";}?>>充值成功</option>
+                    <option value="3" <?php if( $search['search']['pay_status'] == 3 ){ echo "selected";}?>>充值失败</option>
+                </select>
+                <br />
+                订单时间：<input id="stime" class="Wdate" type="text" name="search[ctime][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($search['search']['ctime']['ge'])){ echo $search['search']['ctime']['ge'];} ?>" />
+                至<input id="etime" class="Wdate" type="text" name="search[ctime][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($search['search']['ctime']['le'])){ echo $search['search']['ctime']['le'];} ?>" />
+                到帐时间：<input id="stime1" class="Wdate" type="text" name="search[ttime][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime1\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($search['search']['ttime']['ge'])){ echo $search['search']['ttime']['ge'];} ?>" />
+                至<input id="etime1" class="Wdate" type="text" name="search[ttime][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime1\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($search['search']['ttime']['le'])){ echo $_GET['search']['ttime']['le'];} ?>" />
+                <input type="submit" value="搜索" />
+             </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>充值订单号</td>
+                    <td>财务订单号</td>
+                    <td>状态</td>
+                    <td>用户账号</td>
+                    <td>订单生成时间</td>
+                    <td>金额</td>
+                    <td>到帐时间</td>
+                    <td>收款银行</td>
+                    <td>操作</td>
+                    <td>操作留言</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php if(isset($data['list']) && !empty($data['list'])){
+                    foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td class="tradeno"><?php echo $val['tradeno'];?></td>
+                    <td class="tradeno2"><?php if($val['tradeno2']) echo $val['tradeno2']; else echo '-';?></td>
+                    <td><?php if($val['status'] == 0) echo '未支付'; elseif($val['status'] == 1) echo '处理中'; elseif($val['status'] == 2) echo '充值成功'; else echo '支付失败';?> </td>
+                    <td><?php echo $val['uname'];?></td>
+                    <td><?php echo $val['ctime'];?></td>
+                    <td class="ordermoney"><?php echo ceil($val['points']/10);?></td>
+                    <td><?php if($val['status'] == 2) echo $val['ttime'];else echo '-';?></td>
+                    <td>第三方支付</td>
+                    <td>
+                        <?php if($val['status'] == 0) echo "<input type='button' name='shenghe' class='shenghe' value='人工申核' />";
+                        elseif($val['status'] == 1) echo "充值中";
+                        elseif($val['status'] == 2) echo '支付成功'; else echo '支付失败';?>
+                    </td>
+                    <td><?php if($val['message']) echo $val['message']; else echo '-';?></td><input type="hidden" name="orderlistid" value="<?php echo $val['id']; ?>" />
+                    <input type="hidden" name="reuid" value="<?php echo $val['uid']; ?>" class="reuid"/>
+                </tr>
+            <?php }}?>
+            </tbody>
+        </table>
+
+        <div class="page">
+               <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+               <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+
+    <div class="search" id="make" style="display: none;height: 500px">
+        <table  style="font-size: 18px; line-height: 55px; margin-left:30px;">
+            <tr>
+                <td>充值订单号:</td>
+                <td><label id="orderid"></label></td>
+            </tr>
+            <tr>
+                <td>财务订单号:</td>
+                <td><label id="tradeid"></label></td>
+            </tr>
+            <tr>
+                <td>收费方式:</td>
+                <td>第三方支付</td>
+            </tr>
+            <tr>
+                <td>订单金额:</td>
+                <td><label id="ordermoney"></label></td>
+            </tr>
+            <tr>
+                <td>实际金额:</td>
+                <td><input type="text" name="amount" id="realmoney" class="realmoney" value=""/>元</td>
+            </tr>
+            <tr>
+                <td>留言:</td>
+                <td><input type="text" name="amount" id="message" class="message" value=""/></td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+<script type="text/javascript">
+    $(function() {
+    $(".shenghe").click(function() {
+        //更新下内容
+        var tradeno = $(this).parents('tr').find('.tradeno').html();
+        var tradeno2 = $(this).parents('tr').find('.tradeno2').html();
+        var ordermoney = $(this).parents('tr').find('.ordermoney').html();
+        var reuid = $(this).parents('tr').find('.reuid').val();
+        $('#orderid').html(tradeno);
+        $('#tradeid').html(tradeno2);
+        $('#ordermoney').html(ordermoney);
+        var content = $("#make").html();
+        var d = dialog({
+            id: 'make-channel',
+            title: '充值审核',
+            content: content,
+            width: 450,
+            height: 390,
+            button: [
+                {
+                    value: '确认执行',
+                    callback: function () {
+                        //获取需要的值,执行
+                        //alert($(".ui-dialog").find('.realmoney').val());
+                        //alert($(".ui-dialog").find('.message').val());
+                        var realmoney = $(".ui-dialog").find('.realmoney').val();
+                        var message = $(".ui-dialog").find('.message').val();
+                        $.ajax({
+                          url: "?do=recharge-deal",
+                          dataType: 'json',
+                          type: 'POST',
+                          data:  {'tradeno':tradeno, 'realmoney':realmoney, 'message':message, 'reuid':reuid},
+                          success: function(data1, textStatus){
+                            alert(data1.message);
+                            location.reload();
+                            return true;
+		                  }
+                        });
+                    },
+                    autofocus: true
+                },
+                {
+                    value: '关闭'
+                },
+                {
+                    value: '确认失败',
+                    callback: function () {
+                        //获取需要的值,执行
+                        //alert($(".ui-dialog").find('.realmoney').val());
+                        //alert($(".ui-dialog").find('.message').val());
+                        var realmoney = $(".ui-dialog").find('.realmoney').val();
+                        var message = $(".ui-dialog").find('.message').val();
+                        $.ajax({
+                          url: "?do=recharge-nodeal",
+                          dataType: 'json',
+                          type: 'POST',
+                          data:  {'tradeno':tradeno, 'realmoney':realmoney, 'message':message, 'reuid':reuid},
+                          success: function(data1, textStatus){
+                            alert(data1.message);
+                            location.reload();
+                            return true;
+		                  }
+                        });
+                    },
+                }
+            ]
+        });
+        d.showModal();
+    });
+});
+
+</script>
+</body>
+</html>

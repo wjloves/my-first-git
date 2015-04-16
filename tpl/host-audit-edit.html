@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <form method="post" action="./index.php?do=host-edit">
+        <table>
+                <tr>
+                    <td>主播ID:</td>
+                    <td><?php echo $list['uid'];?></td>
+                </tr>
+                <tr>
+                    <td>主播昵称:</td>
+                    <td><?php echo $list['nickname'];?></td>
+                </tr>
+                 <tr>
+                   <td>真实姓名:</td>
+                   <td><?php echo $list['realname']?></td>
+                </tr>
+                <tr>
+                   <td>手机号码:</td>
+                   <td><?php echo $list['phone']?></td>
+                </tr>
+                <tr>
+                   <td>QQ:</td>
+                   <td><?php echo $list['qq']?></td>
+                </tr>
+                <tr>
+                   <td>所属地区:</td>
+                   <td>中国大陆</td>
+                </tr>
+                <tr>
+                   <td>出生日期:</td>
+                   <td><?php echo $list['birthday'];?></td>
+                </tr>
+               <?php if($list['status'] != 1){?>
+                <tr>
+                   <td>当前状态:</td>
+                   <td><select name="status">
+                       <option value="0">等待审核</option>
+                       
+                       <option value="1">通过审核</option>
+                       
+                       <option value="2">审核不通过</option>
+                    </select></td>
+                </tr>
+                <?php }?>
+               <tr>
+                  <td></td>
+                  <td>
+                    <input type="hidden" name="uid" value="<?php echo $list['uid'];?>"/>
+                    <input type="hidden" name="auid" value="<?php echo $list['auid'];?>"/>
+                    <input type="submit" name="dosubmit" value="提交"/>
+                  </td>
+              </tr>
+        </table>
+        </form>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+</html>

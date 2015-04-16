@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php">
+              选择日期：<input id="stime" class="Wdate" type="text" name="data[time]" onFocus="WdatePicker({Date:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd'})"  value="<?php if(isset($data['time'])){ echo $data['time'];} ?>"  />
+              <input type="hidden" name="do" value="host-daily"/>
+              <input type="submit" name="dosubmit" value="确认" id="sure-btn" />
+             </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>当日等待申请数</td>
+                    <td>主播总数</td>
+                    <td>当日新开播主播数</td>
+                    <td>当日开播主播数</td>
+                </tr>
+            </thead>
+            <tbody>
+                        <tr>
+                            <td class="details">
+                              <?php if(!empty($data['audit'])){?>
+                              <a href="./index.php?do=host-audit&search[ctime][ge]=<?php echo $data['ge'];?>&search[ctime][le]=<?php echo $data['le'];?>"><?php echo  $data['audit'];?></a>
+                                <?php }else{ echo $data['audit'];}?>
+                            </td>
+                            <td class="details">
+                              <?php if(!empty($data['host'])){?>
+                              <a href="./index.php?do=host-list"><?php echo  $data['host'];?></a>
+                                <?php }else{ echo $data['host'];}?></td>
+                            <td class="details">
+                                <?php if(!empty($data['new_host'])){?>
+                              <a href="./index.php?do=host-list&ext=<?php echo $data['new_hosts_id']?>"><?php echo  $data['new_host'];?></a>
+                                <?php }else{ echo $data['new_host'];}?>
+                            </td>
+                            <td class="details">
+                                <?php if(!empty($data['today_host'])){?>
+                              <a href="./index.php?do=host-list&ext=<?php echo $data['today_hosts_id']?>"><?php echo  $data['today_host'];?></a>
+                                <?php }else{ echo $data['today_host'];}?>
+                                
+                            </td>
+                        </tr>
+            </tbody>
+        </table>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+
+</script>
+</html>

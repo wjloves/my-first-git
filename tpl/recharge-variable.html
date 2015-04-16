@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+        .details{text-decoration: none;}
+        #content{font-size: 14px; margin-top: 15px;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form id="myform" method="get" action="./index.php">
+            <select class="select" name="variable_type">
+                    <option value="">帐变类型</option>
+                    <option value="1" <?php if(isset($_GET['variable_type']) && $_GET['variable_type']==1){ echo "selected";}?>>在线充值</option>
+                    <option value="4" <?php if(isset($_GET['variable_type']) && $_GET['variable_type']==4){ echo "selected";}?>>人工充值</option>
+                    <option value="2" <?php if(isset($_GET['variable_type']) && $_GET['variable_type']==2){ echo "selected";}?>>用户消费</option>
+            </select>   
+             帐变时间：<input id="stime" class="Wdate" type="text" name="ge" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  value="<?php if(isset($data['ge'])){ echo $data['ge'];} ?>"  />
+            至<input id="etime" class="Wdate" type="text" name="le" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  value="<?php if(isset($data['le'])){echo $data['le']; }?>" />
+            用户账户：<input class="input" type="text" name="username" value="<?php if(isset($_GET['username'])){ echo $_GET['username']; }?>"/>
+           
+            用户类型：
+            <select class="select" name="roled">
+                    <option value="0" <?php if(isset($_GET['roled'])  && $_GET['roled'] == 0){ echo "selected";}?>>用户</option>
+                    <option value="3" <?php if(isset($_GET['roled'])  && $_GET['roled'] == 3){ echo "selected";}?>>主播</option>
+            </select>
+            帐变金额：<input type="text" id="ge_points" name="ge_points" value="<?php if(isset($_GET['ge_points'])){ echo $_GET['ge_points'];}?>"/> - <input type="text" id="le_points" name="le_points" value="<?php if(isset($_GET['le_points'])){ echo $_GET['le_points'];}?>"/>
+            <input type="hidden" name="do" value="recharge-variable"/>
+            <input type="button" onclick="check()" value="搜索" id="sure-btn" />
+            </span>
+            </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>帐变时间</td>
+                    <td>用户账号</td>
+                    <td>用户类型</td>
+                    <td>帐变类型</td>
+                    <td>支出(钻石)</td>
+                    <td>收入(钻石)</td>
+                    <td>可用余额(钻石)</td>
+                    <td>IP</td>
+                    <td>附言</td>
+                    <td>管理员</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td><?php echo $val['created'];?></td>
+                    <td><?php echo $val['username'];?></td>
+                    <td><?php if($val['roled']==3){ echo "主播";}else{ echo "用户";}?></td>
+
+                    <td><?php 
+                           if(isset($val['cepoints'])){
+                             if($val['roled']==3 && !empty($val['repoints'])){ echo "用户赠送";}else{echo "消费";}
+                           }else{ echo $data['pay_type'][$val['pay_type']];}
+                    ?></td>
+                    <td><?php if(isset($val['cepoints']) && !empty($val['cepoints'])){ echo $val['cepoints'];}else{ echo '-';}?></td>
+                    <td><?php if(isset($val['repoints']) && !empty($val['repoints'])){ echo $val['repoints'];}else{ echo '-';}?></td>
+                    <td><?php echo $val['points'];?></td>
+                    <td><?php echo $val['logined'];?></td>
+                    <td><?php echo $val['online_times'];?></td>
+                    <td>
+                        <?php if($val['status']){?>
+                        <?php if(in_array(23, $priv)){?>
+                        <a class="details" href="javascript:reset(<?php echo $val['uid'];?>);">重置密码</a> &nbsp;&nbsp;
+                        <?php }?>
+                        <?php if(in_array(24, $priv)){?>
+                        <a class="details" href="javascript:sutter(0,<?php echo $val['uid'];?>);">禁闭&nbsp;&nbsp;</a>
+                        <?php }?>
+                        <?php }else{?>
+                        <?php if(in_array(24, $priv)){?>
+                        <a class="details" href="javascript:sutter(1,<?php echo $val['uid'];?>);">解除禁闭&nbsp;&nbsp;</a>
+                        <?php }?>
+                        <?php }?>
+                    </td>
+                </tr>
+            <?php }?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+   function check(){
+        var $iptStart = $("#ge_points");
+        var $iptEnd = $("#le_points");
+        var iptStartVal = parseInt($iptStart.val(), 10);
+        var iptEndVal = parseInt($iptEnd.val(), 10);
+        if (iptStartVal > iptEndVal) {
+            alert("请填写正确的帐变金额区间");
+            return  false;
+        }
+        $("#myform").submit();
+   }
+</script>
+</body>
+</html>

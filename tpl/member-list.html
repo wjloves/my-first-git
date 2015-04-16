@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+             <form method="get" action="./index.php" id="myform">
+                选择日期：<input id="stime" class="Wdate" type="text" name="search[ctime][ge]" value="<?php echo $_GET['search'][ctime][ge]; ?>" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+                至<input id="etime" class="Wdate" type="text" name="search[ctime][le]" value="<?php echo $_GET['search'][ctime][le]; ?>" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+                <select class="select" name="search[order]">
+                        <option value="ctime" <?php if($data['order']=='ctime'){ echo "selected";}?>>选择排序方式</option>
+                        <option value="registed_users" <?php if($data['order']=='registed_users'){ echo "selected";}?>>新注册用户数</option>
+                        <option value="users_in_room" <?php if($data['order']=='users_in_room'){ echo "selected";}?>>连线用户数</option>
+                        <option value="apex_num" <?php if($data['order']=='apex_num'){ echo "selected";}?>>峰值连线数</option>
+                </select>
+                <input type="button" name="summary" value="时间段汇总统计" onclick="javascript:change(1);"/>
+                <input type="hidden" name="do" value="member"/>
+                <input type="button"  value="确认" id="sure-btn" onclick="javascript:change(2);" />
+             </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>日期</td>
+                    <td>新注册用户数</td>
+                    <td>登录账号数</td>
+                    <td>连线用户数</td>
+                    <td>连线人次</td>
+                    <td>峰值连线数</td>
+                    <td>峰值连线时刻</td>
+                    <td>平均停留时长</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td><?php echo $data['search_time'];?></td>
+                    <td><?php echo $data['registed_users'];?></td>
+                    <td><?php echo $data['login_users'];?></td>
+                    <td><?php echo $data['users_in_room'];?></td>
+                    <td><?php echo $data['num_in_room'];?></td>
+                    <td><?php echo $data['apex_num'];?></td>
+                    <td><?php echo $data['apex_time'];?></td>
+                    <td><?php echo $data['avg_time'];?></td>
+                </tr>
+          
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+   function change(obj){
+          if(obj===1){
+               $(".search").find("[name='do']").val("member-list");
+          }else{
+               $(".search").find("[name='do']").val("member");
+          }
+        $("#myform").submit(); 
+   }
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        .details{text-decoration: none;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php">
+            <select class="select" name="host_type">
+                    <option value="">全部主播类型</option>
+                    <?php foreach ($data['tags'] as $key => $value) {?>
+                         <option value="<?php echo $value['tag_id'];?>"><?php echo $value['name'];?></option>
+                    <?php }?>
+            </select>   
+            <select class="select"  name="host_level">
+                    <option value="0">全部主播等级</option>
+                    <option value="1" <?php  if(isset($_GET['host_level']) && $_GET['host_level']==1){ echo "selected";}?>>1-5</option>
+                    <option value="6" <?php  if(isset($_GET['host_level']) && $_GET['host_level']==6){ echo "selected";}?>>6-10</option>
+                    <option value="11" <?php if(isset($_GET['host_level']) && $_GET['host_level']==11){ echo "selected";}?>>11-15</option>
+            </select>
+            ID或昵称 <input class="input" type="text" name="keyword" value="<?php if(isset($_GET['keyword'])){ echo $_GET['keyword'];}?>"/>
+            <select class="select" name="search[order]">
+                    <option value="uid" <?php if(isset($_GET['search']['order']) && $_GET['search']['order']=='uid'){ echo "selected";}?>>按主播ID排序</option>
+<<<<<<< HEAD
+                    <option value="minutes" <?php if(isset($_GET['search']['order']) && $_GET['search']['order']=='minutes'){ echo "selected";}?>>按累计直播分钟数</option>
+=======
+                    <option value="days" <?php if(isset($_GET['search']['order']) && $_GET['search']['order']=='days'){ echo "selected";}?>>按累计直播天数</option>
+>>>>>>> master
+                    <option value="amount" <?php if(isset($_GET['search']['order']) && $_GET['search']['order']=='amount'){ echo "selected";}?>>按累计业绩</option>
+                    <option value="host_level" <?php if(isset($_GET['search']['order']) && $_GET['search']['order']=='host_level'){ echo "selected";}?>>按主播等级</option>
+            </select>
+            <input type="hidden" name="do" value="host-list"/>
+            <input type="submit" value="确认" id="sure-btn" />
+            </form>
+        </div>
+     
+        <table>
+            <thead>
+                <tr>
+                    <td>主播ID</td>
+                    <td>主播昵称</td>
+                    <td>主播类型</td>
+                    <td>主播等级</td>
+                    <td>主播属地</td>
+                    <td>目前状态</td>
+                    <td>最后登录时间</td>
+                    <td>最后直播时间</td>
+                    <td>累积直播分钟数</td>
+                    <td>累积天数</td>
+                  <!--  <td>累积业绩</td> -->
+                    <td>操作</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php if(isset($data['list'])  && !empty($data['list'])){
+                    foreach($data['list'] as $key=>$val){?>
+                    <tr>
+                        <td><?php echo $val['uid'];?></td>
+                        <td><a class="details" href="./index.php?uid=<?php echo $val['uid'];?>&do=host-details&dosubmit=1"><?php echo $val['nickname'];?></a></td>
+                        <td>
+                            <?php foreach ($data['tags'] as $key => $value) {
+                               if(!empty($val['tag']) && in_array($value['tag_id'], $val['tag'])){ ?> 
+                                    <input type="hidden" value="<?php echo $value['tag_id'];?>" name="tag[]" /><?php echo $value['name'];?>
+                            <?php }}?>
+                            <input type="hidden" name="uid" value="<?php echo $val['uid'];?>"/>
+                            <input type="hidden" name="tags" value="<?php echo implode(',',$val['tag']);?>"/>
+                            <span><a href="javascript:;" class="edit_tags"> 编辑 </a></span>
+                        </td>
+                        <td><?php echo $val['lv_exp'];?></td>
+                        <td><?php echo $val['area'];?></td>
+                        <td><?php if(isset($val['is_online'])&&($val['is_online']>-1)){ echo '在线';}else{ echo '下线';}?></td>
+                        <td><?php echo $val['logined'];?></td>
+                        <td><?php echo $val['lastTime'];?></td>
+                        <td><?php echo $val['minutes'];?></td>
+                        <td><?php echo $val['days'];?></td>
+                        <!-- <td><?php echo $val['amount'];?></td>-->
+                        <td><a href="javascript:del(<?php echo $val['uid'];?>);">取消主播资格</a></td>
+                    </tr>
+            <?php }}?>
+            </tbody>
+        </table>
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        
+        <div style="clear:both"></div>
+        <div class="search" id="make" style="display: none;">
+            <table  style="font-size: 18px; line-height: 55px; margin-left:30px;">
+                <?php foreach ($data['tags'] as $key => $value) {
+                 ?>
+                <tr>
+                        <td><input type="checkbox" value="<?php echo $value['tag_id'];?>" name="tag[]" /><?php echo $value['name'];?></td>
+                </tr>
+                <?php }?>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+
+$(function(){$(".edit_tags").click(function(){var td=$(this).closest("td");var uid=td.find("[name='uid']").val();var check_tags=td.find("[name='tags']").val();check_tags=check_tags.split(',');var html=$("#make").html();var data={};var d=dialog({id:'edit_tags',title:'主播类型编辑',content:html,width:400,height:260,okValue:'确定',onshow:function(){var input=$(".ui-dialog").find("[name='tag[]']");$(input).each(function(){var tag=$(this).val();if($.inArray(tag,check_tags)>-1){$(this).attr("checked","checked");}});$(".ui-dialog").find("span").remove();},ok:function(){var tags=$(".ui-dialog").find("[name='tag[]']:checked");var i=0;tags.each(function(){data[i]=$(this).val();i++;});var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=host-ajaxEditType',{data:data,uid:uid},function(msg){m.close(msg);},"json");},cancelValue:'取消',cancel:function(){},});d.showModal();})});function del(delid){var del=dialog({id:"del-host",content:"确认取消主播资格?",okValue:"确认",ok:function(){var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=host-ajaxdel',{id:delid},function(msg){m.close(msg);},'json');},cancelValue:"取消",cancel:function(){}});del.showModal();}
+</script>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php">
+              选择日期：<input id="stime" class="Wdate" type="text" name="search[created][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd'})" value="<?php if(isset($_GET['search']['created']['ge'])){ echo $_GET['search']['created']['ge'];} ?>" />
+              至<input id="etime" class="Wdate" type="text" name="search[created][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd'})" value="<?php if(isset($_GET['search']['created']['le'])){ echo $_GET['search']['created']['le'];} ?>" />
+              用户ID：<input id="uid" class="uid" type="text" name="search[uid]" value="<?php echo $_GET['search']['uid']; ?>" />
+              <input type="hidden" name="do" value="host-statis"/>
+              <input type="submit" name="dosubmit" value="确认" id="sure-btn" />
+             </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>昵称</td>
+                    <td>累计直播分钟数</td>
+                    <td>累计直播天数</td>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $item = '';
+                if($data['list']){
+                    foreach($data['list'] as $key=>$value){
+                                    $item .= '<tr><td class="details">'.$value['uid'].'</td>
+                        <td class="details">'.$value['nickname'].'</td>
+                        <td class="details">'.$value['totalduration'].'</td>
+                        <td class="details">'.$value['num'].'</td></tr>';
+                        }
+                    }
+                    echo $item;
+                ?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+
+</script>
+</html>

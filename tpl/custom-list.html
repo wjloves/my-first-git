@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <!--<script language="javascript" type="text/javascript" src="js/artdialog/dialog.js?skin=blue"></script>
+    <script language="javascript" type="text/javascript" src="js/artdialog/dialog.iframetools.js"></script>
+    <script language="javascript" type="text/javascript" src="js/artdialog/artDialog.plugins.min.js"></script>-->
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+         <form method="get" action="./index.php?do=customService">
+            用户ID或内容： <input class="input" type="text" name="keyword" value="<?php if(!empty($data['keyword'])){ echo $data['keyword'];}?>" />
+            选择日期：<input id="stime" class="Wdate" type="text" name="search[created][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  value="<?php if(isset($_GET['search']['created']['ge'])){ echo $_GET['search']['created']['ge'];} ?>"/>
+            至<input id="etime" class="Wdate" type="text" name="search[created][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($_GET['search']['created']['le'])){ echo $_GET['search']['created']['le'];} ?>" />
+            <select  class="select" name="search[send_uid][eq]">
+                    <option value="">客服名称</option>
+                    <?php foreach($data['custom'] as $val){?>
+                       <option value="<?php echo $val['admin_id'];?>"  <?php if(isset($_GET['search']['send_uid']['eq']) && $val['admin_id']==$_GET['search']['send_uid']['eq']){ echo "selected";}?>><?php echo $val['name'];?></option>
+                    <?php }?>
+            </select>
+            <input type="hidden" name="do" value="customService"/>
+            <input type="submit"  value="查找" id="sure-btn" />
+            <input type="button"  value="新建消息" onclick="newmessage()"  />
+          </form>
+        </div>
+        <?php if($data['list']){?>
+          <table>
+              <thead>
+                  <tr>
+                      <td>用户ID</td>
+                      <td>分类</td>
+                      <td>内容</td>
+                      <td>操作人</td>
+                      <td>发送日期</td>
+                  </tr>
+              </thead>
+
+              <tbody>
+              <?php 
+                if(isset($data['list']) && !empty($data['list'])){
+                  foreach($data['list'] as $key=>$val){?>
+                  <tr>
+                      <td><?php echo $val['rec_uid'];?></td>
+                      <td><?php echo $data['mail_type'][$val['mail_type']];?></td>
+                      <td><?php echo $val['content'];?></td>
+                      <td><?php if(!empty($val['sent_user'])){ echo $val['sent_user'];}else{ echo "system";}?></td>
+                      <td><?php echo $val['created'];?></td>
+                  </tr>
+              <?php }}?>
+              </tbody>
+          </table>
+
+          <div class="page">
+              <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+              <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+          </div>
+        <?php }?>
+        <div style="clear:both"></div>
+        <div class="search" id="message" style="display: none;">
+            <table>
+                 <tr>
+                      <th>消息对象:</th>
+                      <td><input type="radio"  name="choose" value="1" checked id/>单个用户 <input type="text" name="uid" class="input"/></td>
+                 </tr>
+                 <tr>
+                      <th></th>
+                      <td> <input type="radio"  name="choose" value="2"/>群发消息</td>
+                 </tr>
+                <tr style="padding-top: 10px;">
+                        <th>用户等级:</th>
+                        <td>
+                            <select  name="levle" class="select" id="sent_levle">
+                                <option value="0" >全部等级</option>
+                                <?php foreach ($data['level_rich'] as $k => $v) {
+                                ?>
+                                <option value="<?php echo $v['level_id'];?>"><?php echo $v['level_id'];?></option>
+                                <?php }?>
+                             </select>
+                        </td>
+                </tr>
+                <tr>
+                    <th>业务类别:</th>
+                    <td>
+                        <select class="select" id="sent_type">
+                            <?php foreach ($data['mail_type'] as $key => $value) {
+                            ?>
+                                <option value="<?php echo $key;?>"><?php echo $value;?></option>
+                            <?php }?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                      <th></th>
+                      <td><textarea rows="10" cols="48" name="content" id="sent_content"></textarea></td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+function newmessage(){var content=$("#message").html();var d=dialog({id:'new-message',title:'新建短消息',content:content,width:500,height:400,okValue:'确定',ok:function(){var c=$("[name='choose']:checked").val();var uid=$(".ui-dialog").find("[name='uid']").val();var s_content=$(".ui-dialog").find("#sent_content").val();var s_type=$(".ui-dialog").find("#sent_type").val();var s_levle=$(".ui-dialog").find("#sent_levle").val();if(s_content===null||s_content===""){alert("发送内容不能为空");return false;}
+if(s_content.length>120){alert("发送内容不能大于120个字");return false;}
+if(c==1&&uid==""){alert("用户ID不能为空");return false;}
+var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=customService-ajaxMesaage',{content:s_content,type:s_type,levle:s_levle,choose:c,uid:uid},function(msg){m.close(msg);},"json");},cancelValue:'取消',cancel:function(){}});d.showModal();}
+</script>
+</body>
+</html>

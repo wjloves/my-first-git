@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+        .details{text-decoration: none;}
+        #content{font-size: 14px; margin-top: 15px;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php">
+            <select class="select" name="vip_level">
+                    <option value="">全部用户等级</option>
+                    <option value="1"  <?php if(isset($_GET['vip_level']) && $_GET['vip_level']==1){ echo "selected";}?>>1-10</option>
+                    <option value="11" <?php if(isset($_GET['vip_level']) && $_GET['vip_level']==11){ echo "selected";}?>>11-20</option>
+                    <option value="21" <?php if(isset($_GET['vip_level']) && $_GET['vip_level']==21){ echo "selected";}?>>21-30</option>
+            </select>   
+           
+            <select class="select"  name="status">
+                    <option value="">全部用户状态</option>
+                    <option value="1" <?php if(isset($_GET['status']) && $_GET['status']==1){ echo "selected";}?>>有效</option>
+                    <option value="0" <?php if(isset($_GET['status']) && $_GET['status']==='0'){ echo "selected";}?>>禁闭</option>
+            </select>
+           
+            ID或昵称 <input class="input" type="text" name="keyword" value="<?php if(isset($_GET['keyword'])){ echo $_GET['keyword']; } ?>"/>
+            <select class="select" name="search[order]">
+                    <option value="uid" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] == "uid"){ echo "selected";} ?>>按用户ID排序</option>
+                    <option value="logined" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] == "logined"){ echo "selected";} ?>>按最后登录时间</option>
+                    <option value="created" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] == "created"){ echo "selected";} ?>>按注册时间</option>
+                    <option value="rich" <?php if(isset($_GET['search']['order']) && $_GET['search']['order'] == "rich"){ echo "selected";}?>>按累计消费</option>
+            </select>
+            <input type="hidden" name="do" value="vip"/>
+           
+            <input type="submit"  value="确认" id="sure-btn" />
+            </span>
+            </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>用户ID</td>
+                    <td>用户昵称</td>
+                    <td>用户账号</td>
+                    <td>用户等级</td>
+                    <td>账户余额（钻石）</td>
+                    <td>累计消费（钻石）</td>
+                    <td>当前状态</td>
+                    <td>注册时间</td>
+                    <td>最后登录时间</td>
+                    <td>累计在线时长</td>
+                    <?php if( in_array(23, $priv) || in_array(24, $priv) ){?>
+                    <td>操作</td>
+                    <?php }?>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td><?php echo $val['uid'];?></td>
+                    <td><a class="details" href="./index.php?uid=<?php echo $val['uid'];?>&do=vip-details&dosubmit=1"><?php echo $val['nickname'];?></a></td>
+                    <td><?php echo $val['username'];?></td>
+                    <td><?php echo $val['lv_rich'];?></td>
+                    <td><?php echo $val['points'];?></td>
+                    <td><?php echo $val['rich'];?></td>
+                    <td><?php if(isset($val['is_online'])&&($val['is_online']>-1)){ echo '在线';}else{ echo '下线';}?></td>
+                    <td><?php echo $val['created'];?></td>
+                    <td><?php echo $val['logined'];?></td>
+                    <td><?php echo $val['online_times'];?></td>
+                    <td>
+                        <?php if($val['status']){?>
+                        <?php if(in_array(23, $priv)){?>
+                        <a class="details" href="javascript:reset(<?php echo $val['uid'];?>);">重置密码</a> &nbsp;&nbsp;
+                        <?php }?>
+                        <?php if(in_array(24, $priv)){?>
+                        <a class="details" href="javascript:sutter(0,<?php echo $val['uid'];?>);">禁闭&nbsp;&nbsp;</a>
+                        <?php }?>
+                        <?php }else{?>
+                        <?php if(in_array(24, $priv)){?>
+                        <a class="details" href="javascript:sutter(1,<?php echo $val['uid'];?>);">解除禁闭&nbsp;&nbsp;</a>
+                        <?php }?>
+                        <?php }?>
+                    </td>
+                </tr>
+            <?php }?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    
+function reset(obj){var d=dialog({id:"vip-reset",content:"<p id='content'>确定要重置用户密码吗?</p>",okValue:"确认",width:150,height:50,ok:function(){var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=vip-ajaxReset',{id:obj},function(msg){m.close(msg);},'json')},cancelValue:'取消',cancel:function(){},});d.showModal();}
+function sutter(status,obj){if(status){var state="解除禁闭";}else{var state="禁闭";}
+var d=dialog({id:"vip-sutter",content:"<p id='content'>确定要"+state+"用户吗?</p>",okValue:"确认",width:150,height:50,ok:function(){var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=vip-ajaxShutter',{id:obj,status:status},function(msg){m.close(state+msg);},'json')},cancelValue:'取消',cancel:function(){},});d.showModal();}
+</script>
+</body>
+</html>

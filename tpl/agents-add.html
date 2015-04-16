@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <table class="twoCel">
+            <tbody>
+            <tr>
+                <th>代理团队名称：</th>
+                <td><input type="text" name="agentname" value="<?php echo $_POST['agentname'] ?>" id="agentname" /></td>
+            </tr>
+            <tr>
+                <th>代理帐号：</th>
+                <td><input type="text" name="agentaccount" value="<?php echo $_POST['agentaccount'] ?>" id="agentaccount" /></td>
+            </tr>
+            <tr>
+                <th>登陆密码：</th>
+                <td><input type="text" name="password" value="<?php echo $_POST['password'] ?>" id="password" /></td>
+            </tr>
+            <tr>
+                <th>设置返点：</th>
+                <td><input type="text" name="rebate" value="<?php echo $_POST['rebate'] ?>" id="rebate" /></td>
+            </tr>
+            <tr>
+                <th>代理昵称：</th>
+                <td><input type="text" name="nickname" value="<?php echo $_POST['nickname'] ?>" id="nickname" /></td>
+            </tr>
+            <tr>
+                <th>代理提款姓名：</th>
+                <td><input type="text" name="url_domain" value="<?php echo $_POST['url_domain'] ?>" id="url_domain" /></td>
+            </tr>
+            <tr>
+                <th>提款银行类型：</th>
+                <td><input type="text" name="url_domain" value="<?php echo $_POST['url_domain'] ?>" id="url_domain" /></td>
+            </tr>
+            <tr>
+                <th>提款银行账号：</th>
+                <td><input type="text" name="url_domain" value="<?php echo $_POST['url_domain'] ?>" id="url_domain" /></td>
+            </tr>
+            <tr>
+                <th>代理类别：</th>
+                <td><select class="" name="">
+                    <option class="" value="">代理商</option>
+                    <option class="" value="">渠道商</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th>测试帐户：</th>
+                <td><select class="" name="">
+                    <option value="">是</option>
+                    <option value="">否</option>
+                </select> </td>
+            </tr>
+            </tbody>
+         </table>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+        function del(obj) {
+            var width = 300;
+            var height = 150;
+            var content = "<p class='dialog-content'>确定删除吗？</p>";
+            width = 150;
+            height = 50;
+            var state = "删除";
+
+            var d = dialog({
+                id: 'del-admin',
+                content: content,
+                width: width,
+                height: height,
+                fixed: true,
+                okValue: '确定',
+                ok: function() {
+                    var pw = '';
+                    var m = dialog({
+                        id: 'showmessage',
+                        width: 50,
+                        height: 50
+                    });
+                    m.addEventListener('close',
+                            function() {
+                                var t = dialog({
+                                    content: m.returnValue,
+                                    ok: function() {
+                                        location.reload();
+                                    }
+                                });
+                                t.show();
+                            });
+                    m.showModal();
+                    if(obj=='url_domain'){
+                        var url = './index.php?do=domain-ajaxDomainDel';
+                        var param ={url_domain:$("#url_domain").val()};
+                    }else{
+                        var url = './index.php?do=domain-ajaxPageDel';
+                        var param ={url_page:$("#url_page").val()};
+                    }
+                    $.post(url, param,
+                            function(msg) {
+                                m.close(state + msg);
+                            });
+                },
+                cancelValue: '取消',
+                cancel: function() {},
+            });
+            d.showModal();
+        }
+        function add(obj){
+            var param   = null;
+            if(obj=='url_domain'){
+                var url = './index.php?do=domain-ajaxDomainAdd';
+                param ={url_domain:$("#url_domain").val()};
+            }else{
+                var url = './index.php?do=domain-ajaxPageAdd';
+                param ={url_page:$("#url_page").val()};
+            }
+            $.post(url,param,function(data){
+                var a=dialog({
+                    content:data
+                });
+                a.showModal();
+                setTimeout(function () {
+                    a.close().remove();
+                }, 1000);
+            });
+        }
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+             <form method="get" action="./index.php" id="myform">
+                 <input type="hidden" name="do" value="domain-redirectset"/>
+                域名：<select class="select" name="search[url_domain]">
+                 <?php foreach($data['domain_data'] as $k=>$v){?>
+                        <option value="<?php echo $v['url'] ?>" <?php if($v['url']==$_GET['search']['url_domain']){ echo "selected";}?>><?php echo $v['url'] ?></option>
+                 <?php }?>
+                </select>
+                跳转页面：<select class="select" name="search[url_page]">
+                 <?php foreach($data['page_data'] as $k=>$v){?>
+                        <option value="<?php echo $v['url'] ?>" <?php if($v['url']==$_GET['search']['url_page']){ echo "selected";}?>><?php echo $v['url'] ?></option>
+                 <?php }?>
+                </select>
+
+                 <input type="submit"  value="确认" id="sure-btn"  />
+             </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>编号</td>
+                    <td>域名</td>
+                    <td>跳转页面</td>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            <?php foreach($data['redirect_data'] as $k=>$v){?>
+                <tr>
+                        <td><?php echo $v['id'];?></td>
+                        <td><?php echo $v['url_domain'];?></td>
+                        <td><?php echo $v['url_page'];?></td>
+                </tr>
+            <?php }?>
+          
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+</html>

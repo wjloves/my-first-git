@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+   
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+         <form method="get" action="./index.php?do=complaints">
+            用户ID： <input class="input" type="text" name="keyword" value="<?php if(!empty($data['keyword'])){ echo $data['keyword'];}?>"/>
+            选择日期：<input id="stime" class="Wdate" type="text" name="search[created][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  value="<?php if(isset($_GET['search']['created']['ge'])){ echo $_GET['search']['created']['ge'];} ?>"/>
+            至<input id="etime" class="Wdate" type="text" name="search[created][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($_GET['search']['created']['le'])){ echo $_GET['search']['created']['le'];} ?>" />
+            <select  class="select" name="search[admin_id][eq]">
+                    <option value="">客服名称</option>
+                    <?php foreach($data['custom'] as $value){?>
+                       <option value="<?php echo $value['admin_id'];?>"  <?php if(isset($_GET['search']['send_uid']['eq']) && $value['admin_id']==$_GET['search']['editors_id']['eq']){ echo "selected";}?>><?php echo $value['name'];?></option>
+                    <?php }?>
+            </select>
+            <select  class="select" name="search[type][eq]">
+                    <option value="">操作类型</option>
+                    <?php foreach($data['action_type'] as $t=> $value){?>
+                       <option value="<?php echo $t;?>"  <?php if(isset($_GET['search']['type']['eq']) && $t==$_GET['search']['type']['eq']){ echo "selected";}?>><?php echo $value;?></option>
+                    <?php }?>
+            </select>
+            <input type="hidden" name="do" value="log"/>
+            <input type="submit"  value="查找" id="sure-btn" />
+          </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>操作方法</td>
+                    <td>操作类型</td>
+                    <td>操作动作</td>
+                    <td>操作时间</td>
+                    <td>操作人用户名</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php 
+                if(isset($data['list']) && !empty($data['list'])){
+               foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td><?php echo $val['id'];?></td>
+                    <td><?php echo $val['controller'];?></td>
+                    <?php if(isset($data['action_type'])&&!empty($data['action_type'])){
+                        foreach ($data['action_type'] as $k => $v) {
+                            if($k == $val['type']){
+                    ?>
+                      <td><?php  echo $v."操作";?></td>
+                    <?php }}}else{?>
+                      <td>访问</td>
+                    <?php }?>
+                    <td><?php echo $val['type'];?></td>
+                    <td><?php echo $val['created'];?></td>
+                    <td><?php echo $val['name'];?></td>
+                </tr>
+            <?php }}?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+
+    </div>
+</div>
+
+
+</body>
+</html>

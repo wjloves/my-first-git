@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <form method="POST" action="./index.php?do=handrecharge" id="myform">
+            <table class="twoCel">
+                <tbody>
+                    <tr>
+                    	<th>要充值的用户ID：</th>
+                        <td><input type="text" name="uid" value="" id="uid" /></td>    
+                    </tr>
+                    <tr>
+                        <th>充值金额：</th>
+                        <td><input type="text" name="charge_amount" maxlength=8 id="charge_amount" value="" onkeyup="calculate(this)"/>&nbsp; 元<span id="difference"></span></td>    
+                    </tr>
+                    <tr>
+                        <th>充值原因：</th>
+                        <td><input type="text" name="content" value="" id="content" />&nbsp;（必填）</td>    
+                    </tr>
+                    <tr>
+                        <th>充值操作人员：</th>
+                        <td><strong><?php echo $this->_login['name'];?></strong></td>    
+                    </tr>
+                    <tr>
+                        <th>
+                            <input type="hidden" name="admin_id" value="<?php echo $this->_login['admin_id'];?>"/>
+                            <input type="hidden" name="points"    value="" id="point"/>
+                            <input type="hidden" name="dosubmit"  value="true" />
+                        </th>
+                        <td><input onclick="javascript:valicont()" type="button" name="dosubmit" value="确定" /></td>    
+                    </tr>
+                </tbody>
+            </table>
+            <table>
+            <thead>
+                <tr>
+                    <td>充值日期</td>
+                    <td>充值时间</td>
+                    <td>会员昵称</td>
+                    <td>会员ID</td>
+                    <td>充值钻石数量</td>
+                    <td>操作人员名称</td>
+                    <td>充值原因</td>
+                    <td>充值状态</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td><?php echo date('Y-m-d',strtotime($val['ctime']));?></td>
+                    <td><?php echo date('H:i',strtotime($val['ctime']));?></td>
+                    <td><?php echo $val['nickname'];?></td>
+                    <td><?php echo $val['uid'];?></td>
+                    <td><?php echo ($val['charge_amount']*10);?></td>
+                    <td><?php echo $val['admin_name'];?></td>
+                    <td><?php echo $val['content'];?></td>
+                    <td><?php if($val['status'] == 1){ echo "充值成功";}else{ echo "充值失败";}?></td>
+                </tr>
+            <?php }?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+
+
+function calculate(obj){var num=$(obj).val();if(isNaN(num)){$("#difference").text(",充值金额必须为整数");$("#difference").css("color","red");return false;}
+var integral=num*10;if(integral==0){$("#difference").text("");}else{$("#point").val(integral);$("#difference").text(",对应"+integral+"积点");$("#difference").css("color","black");}}
+<<<<<<< HEAD
+function valicont(){var uid=$("#uid").val();var charge_amount=$("#charge_amount").val();var ex=/^\d+$/;if($.trim(uid).length<=0){alert('请输入用户ID');return false;}
+if($.trim(charge_amount).length<=0){alert('请输入充值金额');return false;}
+if(charge_amount==0||charge_amount==''){alert('请输入充值金额');return false;}
+if(!(ex.test(charge_amount))||charge_amount<0){alert('充值金额必须为正整数');return false;}
+=======
+
+function valicont(){var uid=$("#uid").val();var charge_amount=$("#charge_amount").val();var ex=/^[1-9]\d*$/;if($.trim(uid).length<=0){alert('请输入用户ID');return false;}
+if(charge_amount<=0){alert('请输入充值金额');return false;}
+if(!(ex.test(charge_amount))){alert('充值金额必须为正整数');return false;}
+
+>>>>>>> master
+if($.trim($("#content").val()).length<=0){alert('请填写充值原因');return false;}
+$.get('./index.php?do=handrecharge-ajaxGetOne&id='+uid,function(msg){if(msg==1){$("[name='dosubmit']").prop("disabled",true);$("#myform").submit();}else{alert("查无此用户，请重新输入");return false;}});}
+</script>
+</html>

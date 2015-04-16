@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+        input[type="reset"]{background-color:red;color:#fff;border:0px;padding: 5px 10px;border: 1px solid red;cursor: pointer;text-align: center;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <form method="post">
+        <table class="twoCel">
+            <tbody>
+                <tr>
+                    <td>充值帐号:</td>
+                    <td><input type="text" name="account" value="<?php echo $_POST['account'] ?>" id="account" /></td>
+                </tr>
+                <tr>
+                    <td>充值账号类型:</td>
+                    <td><select name="type" id="type">
+                        <?php foreach($data['type'] as $k=>$v){ ?>
+                            <option value="<?php echo $k ?>" <?php if($k==$_POST['type']) echo "selected" ?>><?php echo $v ?></option>
+                        <?php } ?>
+                    </select></td>
+                </tr>
+                 <tr>
+                   <td>充值金额:</td>
+                   <td><input type="text" name="plus_gold" value="<?php echo $_POST['plus_gold'] ?>" id="plus_gold" /></td>
+                </tr>
+                <tr>
+                   <td>充值类型:</td>
+                    <td><select name="rechargetype" id="rechargetype">
+                        <?php foreach($data['rechargetype'] as $k=>$v){?>
+                            <option value="<?php echo $k ?>" <?php if($k==$_POST['rechargetype']) echo "selected" ?>><?php echo $v ?></option>
+                        <?php }?>
+                    </select></td>
+                </tr>
+                <tr>
+                   <td>备注:</td>
+                   <td><input type="text" name="remark" value="<?php echo $_POST['remark'] ?>" id="remark" /></td>
+                </tr>
+               <tr>
+                  <td>
+                  </td>
+                  <td>
+                    <input type="button" onclick="add()" value="确认充值"/>
+                    <input type="reset" name="doreset" value="重置申请"/>
+                  </td>
+              </tr>
+        </table>
+            </form>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    function add() {
+        var width = 300;
+        var height = 150;
+        var content = "<p class='dialog-content'>确定充值吗？</p>";
+        width = 150;
+        height = 50;
+        var state = "充值";
+
+        var d = dialog({
+            id: 'del-admin',
+            content: content,
+            width: width,
+            height: height,
+            fixed: true,
+            okValue: '确定',
+            ok: function() {
+                var pw = '';
+                var m = dialog({
+                    id: 'showmessage',
+                    width: 50,
+                    height: 50
+                });
+                m.addEventListener('close',
+                        function() {
+                            var t = dialog({
+                                content: m.returnValue,
+                                ok: function() {
+                                    location.reload();
+                                }
+                            });
+                            t.show();
+                        });
+                m.showModal();
+                var url = './index.php?do=Mrecharge-ajaxAddapply';
+                var param ={
+                    account:$("#account").val(),
+                    rechargetype:$("#rechargetype").val(),
+                    type:$("#type").val(),
+                    plus_gold:$("#plus_gold").val(),
+                    remark:$("#remark").val()
+                };
+                $.post(url, param,
+                        function(msg) {
+                            m.close(state + msg);
+                        });
+            },
+            cancelValue: '取消',
+            cancel: function() {},
+        });
+        d.showModal();
+    }
+</script>
+</body>
+</html>

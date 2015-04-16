@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+    <link rel="stylesheet" href="js/artDialogV6/css/ui-dialog.css">
+    <script language="javascript" type="text/javascript" src="js/artDialogV6/dist/dialog-min.js"></script>
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <table>
+            <thead>
+                <tr>
+                    <td>主播等级</td>
+                    <td>分成比率%</td>
+                    <td>操作</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach($list as $key=>$val){?>
+                <tr>
+                    <td><?php echo $val['host_level'];?></td>
+                    <td><?php echo $val['host_shares'];?></td>
+                    <td><a href="javascript:edit(<?php echo $val['auid'];?>,<?php echo $val['host_level'];?>,'<?php echo $val['host_shares'];?>')">修改</a></td>
+                </tr>
+            <?php }?>
+                <tr><td></td><td></td><td><input type="button"  value="新增"  id="add"/></td></tr>
+            </tbody>
+        </table>
+        <div style="clear:both"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+
+
+function edit(id,level,shares){var html="主播等级："+level+"<br /><br />分成比率：<input id='host_shares' type='text' value='"+shares+"' />";var d=dialog({id:'edit-shares',title:'修改分成',content:html,okValue:'确定',ok:function(){var ex=/^[1-9]\d*$/;var shares=$("#host_shares").val();if(shares>100){alert("分成比率不能大于100");return false;}
+if(!(ex.test(shares))){alert('分成比率必须为正整数');return false;}
+$.get('./index.php?do=percentage-ajaxEdit&id='+id+'&shares='+shares,function(msg){var t=dialog({content:'修改成功',width:220,ok:function(){location.reload();}});if(msg){t.show().content('修改成功');}else{t.show().content('修改失败');}})},cancelValue:'取消',cancel:function(){}});d.showModal();}
+$(function(){$("#add").click(function(){var a=dialog({id:"add",title:"新增分成比例",content:"主播等级：<input id='host_level' type='text' value='' /><br /><br />分成比率：<input id='host_shares' type='text' value='' />",okValue:'确定',ok:function(){var ex=/^[1-9]\d*$/;var shares=$("#host_shares").val();if(shares>100){alert("分成比率不能大于100");return false;}
+if(!(ex.test(shares))){alert('分成比率必须为正整数');return false;}
+var level=$("#host_level").val();if(!(ex.test(level))){alert('主播等级必须为正整数');return false;}
+var m=dialog({id:'showmessage',width:50,height:50});m.addEventListener('close',function(){var t=dialog({content:m.returnValue,ok:function(){location.reload();}});t.show();});m.showModal();$.post('./index.php?do=percentage-ajaxAdd',{level:level,shares:shares},function(msg){m.close(msg);},"json")},cancelValue:'取消',cancel:function(){}});a.showModal();});});
+</script>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <!--#include virtual="./tpl/header.shtml"-->
+
+    <style type="text/css">
+        div.right div.main .col{width:200px;float:left;}
+    </style>
+</head>
+
+<body>
+<!--#include virtual="./tpl/menu.php" -->
+<div class="right">
+    <div class="top">
+        <div class="login">
+            <div class="login-tip">客服<span style="color:red;font-weight:600"><?php echo $this->_login['name'];?></span>于<?php echo date('Y年m月d日 h时i分',$this->_login['ltime']);?>登录</div>
+            <input type="button" class="btn" onclick="window.location='./index.php?do=login-logout'" name="loginout" value="退出" />
+            <!--#include virtual="./tpl/top.shtml" -->
+        </div>
+    </div>
+    <div class="main">
+        <div class="search">
+            <form method="get" action="./index.php" id="myform">
+                选择日期：<input id="stime" class="Wdate" type="text" name="search[ctime][ge]" onFocus="WdatePicker({maxDate:'#F{$dp.$D(\'etime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($data['ge'])){ echo $data['ge'];} ?>" />
+                至<input id="etime" class="Wdate" type="text" name="search[ctime][le]" onFocus="WdatePicker({minDate:'#F{$dp.$D(\'stime\')}',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php if(isset($data['le'])){ echo $data['le'];} ?>" />
+                <select class="select" name="search[order]">
+                    <option value="ctime" <?php if($_GET['search']['order']=='ctime'){ echo "selected";}?>>选择排序方式</option>
+                    <option value="total_recharge" <?php if($_GET['search']['order']=='total_recharge'){ echo "selected";}?>>充值总人数</option>
+                    <option value="new_recharge" <?php if($_GET['search']['order']=='new_recharge'){ echo "selected";}?>>新增充值用户</option>
+                    <option value="total_amount" <?php if($_GET['search']['order']=='total_amount'){ echo "selected";}?>>消费金额</option>
+                </select>
+                <input type="button" name="summary" value="时间段汇总统计" onclick="javascript:change(1);"/>
+                <input type="hidden" name="do" value="bill"/>
+                <input type="submit"  value="确认" id="sure-btn" />
+             </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <td>日期</td>
+                    <td>新增充值用户</td>
+                    <td>充值总人数</td>
+                    <td>充值订单数</td>
+                    <td>充值金额（元）</td>
+                    <td>平均充值金额（元）</td>
+                    <td>消费ARPU值（元）</td>
+                    <td>消费人数</td>
+                    <td>消费金额（元）</td>
+                    <td>平均消费金额（元）</td>
+                </tr>
+            </thead>
+
+            <tbody>
+            <?php foreach($data['list'] as $key=>$val){?>
+                <tr>
+                    <td><?php echo date('Y-m-d',strtotime('-1 day',strtotime($val['ctime'])));?></td>
+                    <td><?php echo $val['new_recharge'];?></td>
+                    <td><?php echo $val['total_recharge'];?></td>
+                    <td><?php echo $val['total_bill'];?></td>
+                    <td><?php echo round(($val['total_money']/10),2);?></td>
+                    <td><?php echo round(($val['arpu_recharge']/10),2);?></td>
+                    <td><?php echo round(($val['arpu_bill']/10),2);?></td>
+                    <td><?php echo $val['total_customer'];?></td>
+                    <td><?php echo round(($val['total_amount']/10),2);?></td>
+                    <td><?php echo round(($val['arpu_customer']/10),2);?></td>
+                </tr>
+            <?php }?>
+            </tbody>
+        </table>
+
+        <div class="page">
+            <?php if(isset($data['pages'])&&!empty($data['pages'])){ echo $data['pages'];}?>
+            <input type="hidden" value="<?php echo  $data['page_nums'];?>" name="muji_nums" id="muji_nums"/>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+<script type="text/javascript">
+   
+function change(obj){if(obj===1){$(".search").find("[name='do']").val("bill-list");}else{$(".search").find("[name='do']").val("bill");}
+$("#myform").submit();}
+</script>
+</body>
+</html>
